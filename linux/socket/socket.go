@@ -110,12 +110,38 @@ const (
 	HCI_TIME_STAMP = 3
 )
 
+// HCI Packet types
+const (
+	HCI_COMMAND_PKT = 0x01
+	HCI_ACLDATA_PKT = 0x02
+	HCI_SCODATA_PKT = 0x03
+	HCI_EVENT_PKT   = 0x04
+	HCI_VENDOR_PKT  = 0xff
+)
+
 type HCIFilter struct {
 	TypeMask  uint32
-	EventMask [2]uint32
+	EventMask uint64
 	opcode    uint16
 }
 
 func SetsockoptFilter(fd int, f *HCIFilter) (err error) {
 	return setsockopt(fd, SOL_HCI, HCI_FILTER, unsafe.Pointer(f), unsafe.Sizeof(*f))
+}
+
+// HCI filter tools
+func HciFilterSetEvent(e uint64, f *HCIFilter) {
+	f.EventMask = f.EventMask | 1<<e
+}
+
+func HciFilterSetPtype(t uint32, f *HCIFilter) {
+	if t == HCI_VENDOR_PKT {
+		f.TypeMask = f.TypeMask | 1
+	} else {
+		f.TypeMask = f.TypeMask | 1<<t
+	}
+}
+
+func HciFilterSetOpcode(opcode uint16, f *HCIFilter) {
+	f.opcode = opcode
 }

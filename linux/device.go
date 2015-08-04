@@ -1,3 +1,5 @@
+// +build !hci_channel_raw
+
 package linux
 
 import (
